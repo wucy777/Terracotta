@@ -33,12 +33,21 @@
             user-select: none;
         }
         
-        *::-webkit-scrollbar-thumb {
-            background-color: #b5958c;
-        }
-        
         *::-webkit-scrollbar {
-            width: 10px;
+            width: 8px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background-color: rgba(181, 149, 140, 0.5);
+            border-radius: 4px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(181, 149, 140, 0.8);
         }
 
         .top-header {
