@@ -206,7 +206,7 @@ pub fn start_host(room: Room, port: u16, player: Option<String>, capture: AppSta
                     "hostname": p.hostname,
                     "address": p.address.map(|a| a.to_string()),
                     "nat": format!("{:?}", p.nat),
-                    "is_direct": p.is_local,
+                    "is_local": p.is_local,
                 })).collect();
                 *players_field = players;
                 changed = true;

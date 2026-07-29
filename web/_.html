@@ -859,17 +859,17 @@
                             if (document.getElementById("invite-code-display").innerText != r.room) {
                                 document.getElementById("invite-code-display").innerText = r.room;
                             }
-                            if (r.players && r.players.length > 0) {
-                                let players = r.players.filter(p => !p.is_direct);
-                                if (players.length > 0) {
+                            if (r.players && r.players.length > 1) {
+                                let remote = r.players.filter(p => !p.is_local);
+                                if (remote.length > 0) {
                                     let html = "";
-                                    for (let p of players) {
-                                        let conn = p.is_direct ? '<span class="badge-direct">直连</span>' : '<span class="badge-relay">中继</span>';
-                                        html += "<tr><td>" + (p.address || "-") + "</td><td>" + (p.nat || "Unknown") + "</td><td>" + conn + "</td></tr>";
+                                    for (let p of remote) {
+                                        let hint = (p.nat || "").includes("pen") || (p.nat || "").includes("Full") ? "直连" : "中继";
+                                        html += "<tr><td>" + (p.address || "-") + "</td><td>" + (p.nat || "Unknown") + "</td><td>" + hint + "</td></tr>";
                                     }
                                     document.getElementById("players-list-body").innerHTML = html;
                                     document.getElementById("players-list-container").style.display = "";
-                                    document.querySelector("#host-result-view .result-description").innerText = players.length + " 位玩家已连接";
+                                    document.querySelector("#host-result-view .result-description").innerText = remote.length + " 位玩家已连接";
                                 }
                             }
                         } else if (r.state == "guest-connecting" || r.state == "guest-starting") {
