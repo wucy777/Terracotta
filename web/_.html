@@ -377,6 +377,62 @@
             margin: 10px;
         }
 
+        .close-button {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            font-size: 0.95rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 6px 0;
+        }
+
+        .close-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .players-list {
+            width: 100%;
+            margin: 16px 0;
+            text-align: left;
+        }
+
+        .players-list table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .players-list th, .players-list td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: left;
+        }
+
+        .players-list th {
+            opacity: 0.6;
+            font-weight: 400;
+            font-size: 0.8rem;
+        }
+
+        .players-list td {
+            font-weight: 300;
+        }
+
+        .badge-direct {
+            color: #2ecc71;
+        }
+
+        .badge-relay {
+            color: #f39c12;
+        }
+        }
+
         .action-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
@@ -625,7 +681,13 @@
                     <div class="result-icon">✅</div>
                     <h2 class="result-title">成功创建房间</h2>
                     <div class="invite-code" id="invite-code-display">*****-*****-*****-*****-*****</div>
-                    <p class="result-description">请提醒您的朋友下载 Terracotta | 陶瓦联机，选择『我想当房客』并输入此邀请码。</p>
+                    <p class="result-description">正在等待玩家加入</p>
+                    <div class="players-list" id="players-list-container" style="display:none;">
+                        <table>
+                            <thead><tr><th>虚拟 IP</th><th>NAT 类型</th><th>连接方式</th></tr></thead>
+                            <tbody id="players-list-body"></tbody>
+                        </table>
+                    </div>
                     <button class="action-button back-button" id="host-back-button">
                         <i class="fas fa-arrow-left"></i>
                         关闭房间
@@ -710,7 +772,9 @@
     </div>
     <footer>
         <p>需要帮助？<a class="qq-url" href="https://docs.hmcl.net/groups.html">加入 QQ 群</a></p>
-        <p id="web-foot">Terracotta | 陶瓦联机</p>
+        <p style="font-size:0.85rem;opacity:0.7;">关闭浏览器标签页仅关闭此页面，后台进程继续运行。</p>
+        <p><button class="close-button" id="close-app-button">完全关闭 Terracotta</button></p>
+        <p id="web-foot" style="margin-top:4px;">Terracotta | 陶瓦联机</p>
     </footer>
     <script>
         fetch("/meta").then(r => r.json()).then(r => {
@@ -793,6 +857,19 @@
                             showView("host-result-view");
                             if (document.getElementById("invite-code-display").innerText != r.room) {
                                 document.getElementById("invite-code-display").innerText = r.room;
+                            }
+                            if (r.players && r.players.length > 0) {
+                                let players = r.players.filter(p => !p.is_direct);
+                                if (players.length > 0) {
+                                    let html = "";
+                                    for (let p of players) {
+                                        let conn = p.is_direct ? '<span class="badge-direct">直连</span>' : '<span class="badge-relay">中继</span>';
+                                        html += "<tr><td>" + (p.address || "-") + "</td><td>" + (p.nat || "Unknown") + "</td><td>" + conn + "</td></tr>";
+                                    }
+                                    document.getElementById("players-list-body").innerHTML = html;
+                                    document.getElementById("players-list-container").style.display = "";
+                                    document.querySelector("#host-result-view .result-description").innerText = players.length + " 位玩家已连接";
+                                }
                             }
                         } else if (r.state == "guest-connecting" || r.state == "guest-starting") {
                             showView("guest-loading-view");
@@ -880,6 +957,17 @@
                     document.getElementById("invite-code-input-hint").style = "color: orange; font-weight: bold;";
                 }
             });
+        });
+
+        document.getElementById("close-app-button").addEventListener("click", () => {
+            if (confirm("确定要完全关闭 Terracotta 吗？")) {
+                fetch("/panic?peaceful=true").finally(() => {
+                    setTimeout(() => {
+                        try { window.close(); } catch(e) {}
+                        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#f0f0f0;font-size:1.2rem;">Terracotta 已关闭，请关闭此浏览器标签页。</div>';
+                    }, 500);
+                });
+            }
         });
 
         setTimeout(() => {
