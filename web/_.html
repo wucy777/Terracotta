@@ -859,17 +859,17 @@
                             if (document.getElementById("invite-code-display").innerText != r.room) {
                                 document.getElementById("invite-code-display").innerText = r.room;
                             }
-                            if (r.players && r.players.length > 1) {
-                                let remote = r.players.filter(p => !p.is_local);
-                                if (remote.length > 0) {
-                                    let html = "";
-                                    for (let p of remote) {
-                                        html += "<tr><td>" + (p.address || "-") + "</td><td>" + (p.nat || "Unknown") + "</td></tr>";
-                                    }
-                                    document.getElementById("players-list-body").innerHTML = html;
-                                    document.getElementById("players-list-container").style.display = "";
-                                    document.querySelector("#host-result-view .result-description").innerText = remote.length + " 位玩家已连接";
+                            if (r.players && r.players.length > 0) {
+                                let html = "";
+                                for (let p of r.players) {
+                                    let addr = p.address || "中继节点";
+                                    let name = p.is_local ? "（房主）" : "";
+                                    html += "<tr><td>" + addr + name + "</td><td>" + (p.nat || "Unknown") + "</td></tr>";
                                 }
+                                document.getElementById("players-list-body").innerHTML = html;
+                                document.getElementById("players-list-container").style.display = "";
+                                let count = r.players.filter(p => !p.is_local).length;
+                                document.querySelector("#host-result-view .result-description").innerText = count > 0 ? count + " 位玩家已连接" : "正在等待玩家加入";
                             }
                         } else if (r.state == "guest-connecting" || r.state == "guest-starting") {
                             showView("guest-loading-view");
