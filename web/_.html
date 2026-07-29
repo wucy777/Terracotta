@@ -23,16 +23,38 @@
             color: #f0f0f0;
             min-height: 100vh;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
             overflow-x: hidden;
             scrollbar-color: #b5958c #16213e;
             user-select: none;
         }
+        
+        *::-webkit-scrollbar-thumb {
+            background-color: #b5958c;
+        }
+        
+        *::-webkit-scrollbar {
+            width: 10px;
+        }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
+            width: 100%;
             padding: 20px;
             text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 80px;
+            right: 0;
+            overflow: auto;
+        }
+
+        header {
+            margin-bottom: 40px;
         }
 
         h1 {
@@ -355,61 +377,6 @@
             margin: 10px;
         }
 
-        .close-button {
-            background: linear-gradient(135deg, #c0392b, #e74c3c);
-            color: white;
-            border: none;
-            padding: 10px 28px;
-            font-size: 0.95rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            margin: 6px 0;
-        }
-
-        .close-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
-
-        .players-list {
-            width: 100%;
-            margin: 16px 0;
-            text-align: left;
-        }
-
-        .players-list table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        .players-list th, .players-list td {
-            padding: 8px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            text-align: left;
-        }
-
-        .players-list th {
-            opacity: 0.6;
-            font-weight: 400;
-            font-size: 0.8rem;
-        }
-
-        .players-list td {
-            font-weight: 300;
-        }
-
-        .badge-direct {
-            color: #2ecc71;
-        }
-
-        .badge-relay {
-            color: #f39c12;
-        }
-
         .action-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
@@ -477,11 +444,14 @@
         }
 
         footer {
+            margin-top: 40px;
             font-size: 0.9rem;
             opacity: 0.6;
             text-align: center;
-            margin-top: 40px;
-            padding: 20px;
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
         }
 
         @keyframes pulse {
@@ -525,6 +495,53 @@
 
         .tile:hover .tile-icon {
             animation: pulse 1.5s infinite;
+        }
+
+        .players-panel {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 16px 0;
+            text-align: left;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .players-panel table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .players-panel th, .players-panel td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+        }
+
+        .players-panel th {
+            opacity: 0.5;
+            font-weight: 400;
+            font-size: 0.8rem;
+        }
+
+        .players-panel td {
+            font-weight: 300;
+        }
+
+        .close-button {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            font-size: 0.9rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 6px 0;
+        }
+
+        .close-button:hover {
+            background: #e74c3c;
         }
 
         @media (max-width: 900px) {
@@ -586,9 +603,10 @@
 
 <body style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
     <div class="container">
-        <h1 style="font-weight: bold;" id="page-title">Terracotta | 陶瓦联机</h1>
-        <div class="subtitle">基于 EasyTier 的 Minecraft 联机助手</div>
-        <div style="font-size:0.9rem;opacity:0.6;margin:10px 0 20px;line-height:1.6;">关闭浏览器或关闭当前标签页面，程序仍然在后台运行（不会退出或关闭房间），下次打开时会恢复到最后退出时页面。<br>要完全关闭，请点击最下方按钮，此操作会关闭或退出当前所在房间。</div>
+        <header>
+            <h1 style="font-weight: bold;" id="page-title">Terracotta | 陶瓦联机</h1>
+            <div class="subtitle">基于 EasyTier 的 Minecraft 联机助手</div>
+        </header>
 
         <div class="view-container">
             <div class="view active" id="main-view">
@@ -654,11 +672,11 @@
                     <div class="result-icon">✅</div>
                     <h2 class="result-title">成功创建房间</h2>
                     <div class="invite-code" id="invite-code-display">*****-*****-*****-*****-*****</div>
-                    <p class="result-description">正在等待玩家加入</p>
-                    <div class="players-list" id="players-list-container" style="display:none;">
+                    <p class="result-description" id="host-status-text">正在等待玩家加入</p>
+                    <div class="players-panel" id="players-panel" style="display:none;">
                         <table>
                             <thead><tr><th>虚拟 IP</th><th>NAT 类型</th></tr></thead>
-                            <tbody id="players-list-body"></tbody>
+                            <tbody id="players-panel-body"></tbody>
                         </table>
                     </div>
                     <button class="action-button back-button" id="host-back-button">
@@ -745,9 +763,8 @@
     </div>
     <footer>
         <p>需要帮助？<a class="qq-url" href="https://docs.hmcl.net/groups.html">加入 QQ 群</a></p>
-
         <p><button class="close-button" id="close-app-button">完全关闭 Terracotta 及后台进程</button></p>
-        <p id="web-foot" style="margin-top:4px;">Terracotta | 陶瓦联机</p>
+        <p id="web-foot">Terracotta | 陶瓦联机</p>
     </footer>
     <script>
         fetch("/meta").then(r => r.json()).then(r => {
@@ -839,10 +856,10 @@
                                     let nat = p.nat && p.nat != "Unknown" ? p.nat : "-";
                                     html += "<tr><td>" + addr + name + "</td><td>" + nat + "</td></tr>";
                                 }
-                                document.getElementById("players-list-body").innerHTML = html;
-                                document.getElementById("players-list-container").style.display = "";
+                                document.getElementById("players-panel-body").innerHTML = html;
+                                document.getElementById("players-panel").style.display = "";
                                 let count = r.players.filter(p => !p.is_local).length;
-                                document.querySelector("#host-result-view .result-description").innerText = count > 0 ? count + " 位玩家已连接" : "正在等待玩家加入";
+                                document.getElementById("host-status-text").innerText = count > 0 ? count + " 位玩家已连接" : "正在等待玩家加入";
                             }
                         } else if (r.state == "guest-connecting" || r.state == "guest-starting") {
                             showView("guest-loading-view");
