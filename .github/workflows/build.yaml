@@ -1,0 +1,50 @@
+name: Build Terracotta
+
+on:
+  push:
+    branches: ["*"]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          rustup target add --toolchain nightly x86_64-pc-windows-msvc
+          rustup component add rust-src --toolchain "nightly-x86_64-pc-windows-msvc"
+          cargo +nightly build --release --bin terracotta --target x86_64-pc-windows-msvc `
+            -Z build-std=core,std,alloc,proc_macro,panic_abort `
+            -Z build-std-features=default,optimize_for_size
+        env:
+          RUSTFLAGS: -Zunstable-options -Cpanic=immediate-abort
+      - uses: actions/upload-artifact@v4
+        with:
+          name: terracotta-windows-x86_64
+          path: target/x86_64-pc-windows-msvc/release/terracotta.exe
+
+  build-linux-arm64-musl:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native musl
+        run: |
+          sudo apt update
+          sudo apt install --yes --no-install-recommends build-essential musl-tools musl-dev
+      - name: Build
+        run: |
+          rustup target add --toolchain nightly aarch64-unknown-linux-musl
+          rustup component add rust-src --toolchain "nightly-aarch64-unknown-linux-gnu"
+          cargo +nightly build --release --bin terracotta --target aarch64-unknown-linux-musl \
+            -Z build-std=core,std,alloc,proc_macro,panic_abort \
+            -Z build-std-features=default,optimize_for_size
+        env:
+          RUSTFLAGS: -Zunstable-options -Cpanic=immediate-abort
+      - uses: actions/upload-artifact@v4
+        with:
+          name: terracotta-openwrt-aarch64-musl
+          path: target/aarch64-unknown-linux-musl/release/terracotta
