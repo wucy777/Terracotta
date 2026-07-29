@@ -864,7 +864,8 @@
                                 for (let p of r.players) {
                                     let addr = p.address || "中继节点";
                                     let name = p.is_local ? "（房主）" : "";
-                                    html += "<tr><td>" + addr + name + "</td><td>" + (p.nat || "Unknown") + "</td></tr>";
+                                    let nat = p.nat && p.nat != "Unknown" ? p.nat : "-";
+                                    html += "<tr><td>" + addr + name + "</td><td>" + nat + "</td></tr>";
                                 }
                                 document.getElementById("players-list-body").innerHTML = html;
                                 document.getElementById("players-list-container").style.display = "";
