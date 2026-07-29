@@ -685,7 +685,7 @@
                     <p class="result-description">正在等待玩家加入</p>
                     <div class="players-list" id="players-list-container" style="display:none;">
                         <table>
-                            <thead><tr><th>虚拟 IP</th><th>NAT 类型</th><th>连接方式</th></tr></thead>
+                            <thead><tr><th>虚拟 IP</th><th>NAT 类型</th></tr></thead>
                             <tbody id="players-list-body"></tbody>
                         </table>
                     </div>
@@ -864,8 +864,7 @@
                                 if (remote.length > 0) {
                                     let html = "";
                                     for (let p of remote) {
-                                        let hint = (p.nat || "").includes("pen") || (p.nat || "").includes("Full") ? "直连" : "中继";
-                                        html += "<tr><td>" + (p.address || "-") + "</td><td>" + (p.nat || "Unknown") + "</td><td>" + hint + "</td></tr>";
+                                        html += "<tr><td>" + (p.address || "-") + "</td><td>" + (p.nat || "Unknown") + "</td></tr>";
                                     }
                                     document.getElementById("players-list-body").innerHTML = html;
                                     document.getElementById("players-list-container").style.display = "";
