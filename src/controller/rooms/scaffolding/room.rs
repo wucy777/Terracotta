@@ -165,6 +165,7 @@ pub fn start_host(room: Room, port: u16, player: Option<String>, capture: AppSta
                     kind: ProfileKind::HOST
                 }.into_profile()
             )],
+            players: vec![],
         })
     };
 
@@ -189,7 +190,7 @@ pub fn start_host(room: Room, port: u16, player: Option<String>, capture: AppSta
             let Some(mut state) = capture.try_capture() else {
                 return;
             };
-            let AppState::HostOk { easytier, profiles, .. } = state.as_mut_ref() else {
+            let AppState::HostOk { easytier, profiles, players: players_field, .. } = state.as_mut_ref() else {
                 unreachable!();
             };
 
@@ -199,6 +200,18 @@ pub fn start_host(room: Room, port: u16, player: Option<String>, capture: AppSta
             }
 
             let mut changed = false;
+
+            if let Some(players) = easytier.get_players() {
+                let players: Vec<serde_json::Value> = players.into_iter().map(|p| serde_json::json!({
+                    "hostname": p.hostname,
+                    "address": p.address.map(|a| a.to_string()),
+                    "nat": format!("{:?}", p.nat),
+                    "is_local": p.is_local,
+                })).collect();
+                *players_field = players;
+                changed = true;
+            }
+
             let now = SystemTime::now();
             for i in (1..profiles.len()).rev() {
                 let (time, profile) = &profiles[i];
@@ -427,7 +440,7 @@ pub fn start_guest(room: Room, player: Option<String>, capture: AppStateCapture,
             return;
         };
         state.replace(|state| {
-            let AppState::GuestStarting { room, easytier, .. } = state else {
+            let AppState::GuestStarting { room, easytier, difficulty } = state else {
                 unreachable!();
             };
 
@@ -436,6 +449,7 @@ pub fn start_guest(room: Room, player: Option<String>, capture: AppStateCapture,
                 easytier,
                 server: FakeServer::create(local_port, crate::MOTD),
                 profiles: vec![local_profile.clone()],
+                difficulty,
             }
         })
     };

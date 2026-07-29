@@ -16,9 +16,9 @@ fn set_state_ide() -> Status {
     Status::Ok
 }
 
-#[get("/scanning?<room>&<player>&<public_nodes>")]
-fn set_state_scanning(room: Option<String>, player: Option<String>, public_nodes: Vec<String>) -> Status {
-    controller::set_scanning(room, player, public_nodes);
+#[get("/scanning?<room>&<player>&<public_nodes>&<password>")]
+fn set_state_scanning(room: Option<String>, player: Option<String>, public_nodes: Vec<String>, password: Option<String>) -> Status {
+    controller::set_scanning(room, player, public_nodes, password);
     Status::Ok
 }
 

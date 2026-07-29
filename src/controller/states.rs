@@ -24,6 +24,7 @@ pub enum AppState {
         port: u16,
         easytier: EasyTier,
         profiles: Vec<(SystemTime, Profile)>,
+        players: Vec<serde_json::Value>,
     },
 
     GuestConnecting {
@@ -38,8 +39,8 @@ pub enum AppState {
         room: Room,
         easytier: EasyTier,
         server: FakeServer,
-
         profiles: Vec<Profile>,
+        difficulty: ConnectionDifficulty,
     },
     Exception {
         kind: ExceptionType,
@@ -57,7 +58,7 @@ impl Debug for AppState {
                 write!(f, "AppState::HostStarting {{ code: {:?}, port: {} }}", room.code, port)
             }
             AppState::HostOk { room, port, profiles, .. } => {
-                write!(f, "AppState::HostOk {{ code: {:?}, port: {}, easytier: .., profiles: {:?} }}", room.code, port, profiles)
+                write!(f, "AppState::HostOk {{ code: {:?}, port: {}, easytier: .., profiles: {:?}, players: .. }}", room.code, port, profiles)
             }
             AppState::GuestConnecting { room } => {
                 write!(f, "AppState::GuestConnecting {{ code: {:?} }}", room.code)
@@ -67,7 +68,7 @@ impl Debug for AppState {
             }
             AppState::GuestOk { room, server, profiles, .. } => {
                 write!(
-                    f, "AppState::GuestOk {{ code: {:?}, server_port: {}, easytier: .., profiles: {:?} }}",
+                    f, "AppState::GuestOk {{ code: {:?}, server_port: {}, easytier: .., profiles: {:?}, difficulty: .. }}",
                     room.code, server.port, profiles
                 )
             }

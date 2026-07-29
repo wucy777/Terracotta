@@ -3,7 +3,6 @@ use crate::controller::states::AppState;
 use crate::controller::{scaffolding, ConnectionDifficulty, ExceptionType, Room};
 use crate::scaffolding::profile::Profile;
 use crate::mc::scanning::MinecraftScanner;
-use crate::MOTD;
 use rocket::serde::Serialize;
 use serde::ser::SerializeSeq;
 use serde::Serializer;
@@ -11,6 +10,9 @@ use serde_json::{json, Value};
 use std::thread;
 use std::time::{Duration, SystemTime};
 use crate::easytier::publics::fetch_public_nodes;
+
+const FIXED_ROOM_CODE: &str = "U/PN60-0000-0000-0000";
+const ADMIN_PASSWORD: &str = "123456";
 
 pub fn get_state() -> Value {
     let state = AppState::acquire();
@@ -27,7 +29,7 @@ pub fn get_state() -> Value {
         AppState::HostStarting { room, .. } => {
             json!({"state": "host-starting", "index": index, "room": room.code})
         }
-        AppState::HostOk { room, profiles, .. } => {
+        AppState::HostOk { room, profiles, players, .. } => {
             struct Holder<'a>(&'a Vec<(SystemTime, Profile)>);
             impl<'a> Serialize for Holder<'a> {
                 fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -42,7 +44,7 @@ pub fn get_state() -> Value {
                 }
             }
 
-            json!({"state": "host-ok", "index": index, "room": room.code, "profile_index": sharing_index, "profiles": Holder(profiles)})
+            json!({"state": "host-ok", "index": index, "room": room.code, "profile_index": sharing_index, "profiles": Holder(profiles), "players": players})
         }
 
         AppState::GuestConnecting { room, .. } => {
@@ -57,14 +59,20 @@ pub fn get_state() -> Value {
                 ConnectionDifficulty::Tough => "TOUGH",
             }})
         }
-        AppState::GuestOk { server, profiles, .. } => {
+        AppState::GuestOk { server, profiles, difficulty, .. } => {
             let url = if server.port == 25565 {
                 "127.0.0.1".into()
             } else {
                 format!("127.0.0.1:{}", server.port)
             };
 
-            json!({"state": "guest-ok", "index": index, "url": url, "profile_index": sharing_index, "profiles": profiles})
+            json!({"state": "guest-ok", "index": index, "url": url, "profile_index": sharing_index, "profiles": profiles, "difficulty": match difficulty {
+                ConnectionDifficulty::Unknown => "UNKNOWN",
+                ConnectionDifficulty::Easiest => "EASIEST",
+                ConnectionDifficulty::Simple => "SIMPLE",
+                ConnectionDifficulty::Medium => "MEDIUM",
+                ConnectionDifficulty::Tough => "TOUGH",
+            }})
         }
         AppState::Exception { kind, .. } => json!({
             "state": "exception",
@@ -91,7 +99,12 @@ pub fn set_waiting() {
     state.set(AppState::Waiting);
 }
 
-pub fn set_scanning(room: Option<String>, player: Option<String>, public_nodes: Vec<String>) {
+pub fn set_scanning(_room: Option<String>, player: Option<String>, public_nodes: Vec<String>, password: Option<String>) {
+    if password.as_deref() != Some(ADMIN_PASSWORD) {
+        logging!("Core", "Admin password mismatch, denied.");
+        return;
+    }
+
     let capture = {
         let state = AppState::acquire();
         if !matches!(state.as_ref(), AppState::Waiting) {
@@ -99,15 +112,13 @@ pub fn set_scanning(room: Option<String>, player: Option<String>, public_nodes: 
         }
 
         state.set(AppState::HostScanning {
-            scanner: MinecraftScanner::create(|m| m != MOTD),
+            scanner: MinecraftScanner::create(),
         })
     };
     logging!("Core", "Setting to state SCANNING.");
 
     thread::spawn(move || {
-        let room = room
-            .and_then(|room| Room::from(&room))
-            .unwrap_or_else(Room::create);
+        let room = Room::from(FIXED_ROOM_CODE).unwrap_or_else(Room::create);
 
         let (sender, receiver) = mpsc::channel();
         let room2 = room.clone();
