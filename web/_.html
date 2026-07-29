@@ -497,34 +497,59 @@
             animation: pulse 1.5s infinite;
         }
 
-        .players-panel {
-            max-height: 200px;
-            overflow-y: auto;
-            margin: 16px 0;
-            text-align: left;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        .host-result-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 24px;
+            flex-wrap: wrap;
         }
 
-        .players-panel table {
+        .host-result-container .result-view {
+            flex: 0 0 auto;
+            width: 420px;
+            margin: 0;
+        }
+
+        .players-window {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 24px;
+            width: 420px;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: left;
+        }
+
+        .players-window h3 {
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 12px;
+            opacity: 0.7;
+            color: #fad0c4;
+        }
+
+        .players-window table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9rem;
         }
 
-        .players-panel th, .players-panel td {
+        .players-window th, .players-window td {
             padding: 8px 12px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
             text-align: left;
         }
 
-        .players-panel th {
+        .players-window th {
             opacity: 0.5;
             font-weight: 400;
             font-size: 0.8rem;
         }
 
-        .players-panel td {
+        .players-window td {
             font-weight: 300;
         }
 
@@ -567,6 +592,17 @@
             .result-view,
             .error-view {
                 padding: 30px 20px;
+            }
+
+            .host-result-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .host-result-container .result-view,
+            .players-window {
+                max-width: 400px;
+                width: 100%;
             }
         }
 
@@ -668,21 +704,24 @@
             </div>
 
             <div class="view" id="host-result-view">
-                <div class="result-view">
-                    <div class="result-icon">✅</div>
-                    <h2 class="result-title">成功创建房间</h2>
-                    <div class="invite-code" id="invite-code-display">*****-*****-*****-*****-*****</div>
-                    <p class="result-description" id="host-status-text">正在等待玩家加入</p>
-                    <div class="players-panel" id="players-panel" style="display:none;">
+                <div class="host-result-container">
+                    <div class="result-view">
+                        <div class="result-icon">✅</div>
+                        <h2 class="result-title">成功创建房间</h2>
+                        <div class="invite-code" id="invite-code-display">*****-*****-*****-*****-*****</div>
+                        <p class="result-description" id="host-status-text">正在等待玩家加入</p>
+                        <button class="action-button back-button" id="host-back-button">
+                            <i class="fas fa-arrow-left"></i>
+                            关闭房间
+                        </button>
+                    </div>
+                    <div class="players-window" id="players-panel" style="display:none;">
+                        <h3>已连接玩家</h3>
                         <table>
                             <thead><tr><th>虚拟 IP</th><th>NAT 类型</th></tr></thead>
                             <tbody id="players-panel-body"></tbody>
                         </table>
                     </div>
-                    <button class="action-button back-button" id="host-back-button">
-                        <i class="fas fa-arrow-left"></i>
-                        关闭房间
-                    </button>
                 </div>
             </div>
 
@@ -858,6 +897,8 @@
                                 }
                                 document.getElementById("players-panel-body").innerHTML = html;
                                 document.getElementById("players-panel").style.display = "";
+                                let resultView = document.querySelector("#host-result-view .result-view");
+                                document.getElementById("players-panel").style.maxHeight = resultView.offsetHeight + "px";
                                 let count = r.players.filter(p => !p.is_local).length;
                                 document.getElementById("host-status-text").innerText = count > 0 ? count + " 位玩家已连接" : "正在等待玩家加入";
                             }
