@@ -41,20 +41,26 @@
             width: 10px;
         }
 
-        .container {
-            width: 100%;
-            padding: 20px 20px 180px;
-            text-align: center;
+        .top-header {
             position: fixed;
             top: 0;
             left: 0;
-            bottom: 0;
             right: 0;
-            overflow: auto;
+            padding: 20px 20px 10px;
+            text-align: center;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(26,26,46,0.95), rgba(22,33,62,0.95));
         }
 
-        header {
-            margin-bottom: 40px;
+        .container {
+            padding: 20px;
+            text-align: center;
+            position: fixed;
+            top: 150px;
+            left: 0;
+            bottom: 170px;
+            right: 0;
+            overflow: auto;
         }
 
         h1 {
@@ -613,13 +619,13 @@
 </head>
 
 <body style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
-    <div class="container">
-        <header>
-            <h1 style="font-weight: bold;" id="page-title">Terracotta | 陶瓦联机</h1>
-            <div class="subtitle">基于 EasyTier 的 Minecraft 联机助手</div>
-            <div style="font-size:0.9rem;opacity:0.6;margin-top:10px;line-height:1.6;">关闭浏览器或关闭当前标签页面，程序仍然在后台运行（不会退出或关闭房间），下次打开时会恢复到最后退出时页面。<br>要完全关闭，请点击最下方按钮，此操作会关闭或退出当前所在房间。</div>
-        </header>
+    <div class="top-header">
+        <h1 style="font-weight: bold;" id="page-title">Terracotta | 陶瓦联机</h1>
+        <div class="subtitle">基于 EasyTier 的 Minecraft 联机助手</div>
+        <div style="font-size:0.9rem;opacity:0.6;margin-top:10px;line-height:1.6;">关闭浏览器或关闭当前标签页面，程序仍然在后台运行（不会退出或关闭房间），下次打开时会恢复到最后退出时页面。<br>要完全关闭，请点击最下方按钮，此操作会关闭或退出当前所在房间。</div>
+    </div>
 
+    <div class="container">
         <div class="view-container">
             <div class="view active" id="main-view">
                 <div class="role-selection">
